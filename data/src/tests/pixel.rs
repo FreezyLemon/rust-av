@@ -59,10 +59,10 @@ fn test_frame_copy_from_slice() {
 
 #[test]
 fn fmt() {
-    println!("formaton yuv- {}", YUV420);
-    println!("formaton pal- {}", PAL8);
-    println!("formaton rgb565- {}", RGB565);
-    println!("formaton rgba- {}", RGBA);
-    println!("formaton rgb48- {}", RGB48);
-    println!("formaton rgba64- {}", RGBA64);
+    println!("formaton yuv- {YUV420}");
+    println!("formaton pal- {PAL8}");
+    println!("formaton rgb565- {RGB565}");
+    println!("formaton rgba- {RGBA}");
+    println!("formaton rgb48- {RGB48}");
+    println!("formaton rgba64- {RGBA64}");
 }

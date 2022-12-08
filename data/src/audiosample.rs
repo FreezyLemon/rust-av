@@ -230,7 +230,7 @@ impl fmt::Display for ChannelType {
             ChannelType::Lo => "Lo".to_string(),
             ChannelType::Ro => "Ro".to_string(),
         };
-        write!(f, "{}", name)
+        write!(f, "{name}")
     }
 }
 

@@ -380,7 +380,7 @@ impl fmt::Display for YUVSystem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use self::YUVSystem::*;
         match *self {
-            YCbCr(range) => write!(f, "YCbCr ({})", range),
+            YCbCr(range) => write!(f, "YCbCr ({range})"),
             YCoCg => write!(f, "YCbCg"),
             ICtCp => write!(f, "ICtCp"),
         }
@@ -406,7 +406,7 @@ impl fmt::Display for TrichromaticEncodingSystem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use self::TrichromaticEncodingSystem::*;
         match *self {
-            YUV(system) => write!(f, "{}", system),
+            YUV(system) => write!(f, "{system}"),
             RGB => write!(f, "RGB"),
             XYZ => write!(f, "XYZ"),
         }
@@ -436,7 +436,7 @@ pub enum ColorModel {
 impl fmt::Display for ColorModel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            ColorModel::Trichromatic(system) => write!(f, "{}", system),
+            ColorModel::Trichromatic(system) => write!(f, "{system}"),
             ColorModel::CMYK => write!(f, "CMYK"),
             ColorModel::HSV => write!(f, "HSV"),
             ColorModel::LAB => write!(f, "LAB"),
@@ -800,10 +800,10 @@ impl fmt::Display for Formaton {
         );
         for &i in self.into_iter() {
             if let Some(chr) = i {
-                str = format!("{} {}", str, chr);
+                str = format!("{str} {chr}");
             }
         }
-        write!(f, "[{}]", str)
+        write!(f, "[{str}]")
     }
 }
 

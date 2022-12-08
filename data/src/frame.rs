@@ -285,10 +285,10 @@ impl MediaKind {
 impl fmt::Display for MediaKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let ret = match self {
-            MediaKind::Audio(fmt) => format!("{}", fmt),
-            MediaKind::Video(fmt) => format!("{}", fmt),
+            MediaKind::Audio(fmt) => format!("{fmt}"),
+            MediaKind::Video(fmt) => format!("{fmt}"),
         };
-        write!(f, "{}", ret)
+        write!(f, "{ret}")
     }
 }
 
