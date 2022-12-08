@@ -12,7 +12,6 @@ use core::ptr::copy_nonoverlapping;
 
 use byte_slice_cast::*;
 use bytes::BytesMut;
-use thiserror::Error;
 
 use crate::audiosample::*;
 use crate::pixel::*;
@@ -21,15 +20,27 @@ use crate::timeinfo::*;
 use self::FrameError::*;
 
 /// Frame errors.
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum FrameError {
     /// Invalid frame index.
-    #[error("Invalid Index")]
     InvalidIndex,
     /// Invalid frame conversion.
-    #[error("Invalid Conversion")]
     InvalidConversion,
 }
+
+impl fmt::Display for FrameError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            InvalidIndex => "Invalid Index",
+            InvalidConversion => "Invalid Conversion",
+        };
+        
+        write!(f, "{s}")
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for FrameError {}
 
 // TODO: Change it to provide Droppable/Seekable information or use a separate enum?
 /// A list of recognized frame types.
