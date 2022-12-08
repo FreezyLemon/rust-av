@@ -19,3 +19,7 @@ thiserror = "1.0"
 num-rational = "0.4.0"
 num-traits = "0.2.8"
 num-derive = "0.3"
+
+[[tests]]
+name = "All tests"
+required-features = ["std"]

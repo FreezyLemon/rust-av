@@ -1154,34 +1154,3 @@ pub mod formats {
         palette: false,
     };
 }
-
-#[cfg(test)]
-mod test {
-    mod formats {
-        use super::super::*;
-        #[test]
-        fn fmt() {
-            println!("formaton yuv- {}", formats::YUV420);
-            println!("formaton pal- {}", formats::PAL8);
-            println!("formaton rgb565- {}", formats::RGB565);
-            println!("formaton rgba- {}", formats::RGBA);
-            println!("formaton rgb48- {}", formats::RGB48);
-            println!("formaton rgba64- {}", formats::RGBA64);
-        }
-
-        #[test]
-        fn comparison() {
-            use std::sync::Arc;
-            let rcf = Arc::new(*formats::YUV420);
-            let cf = &formats::YUV420.clone();
-
-            if cf != formats::YUV420 {
-                panic!("cf");
-            }
-
-            if *rcf != *formats::YUV420 {
-                panic!("rcf");
-            }
-        }
-    }
-}

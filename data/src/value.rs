@@ -66,21 +66,3 @@ impl<'a> From<Arc<Soniton>> for Value<'a> {
         Value::Soniton(v)
     }
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use std::fmt::Debug;
-
-    fn p<'a, T>(v: T)
-    where
-        T: Into<Value<'a>> + Debug,
-    {
-        println!("{:?}", v);
-    }
-
-    #[test]
-    fn value_str() {
-        p("test");
-    }
-}

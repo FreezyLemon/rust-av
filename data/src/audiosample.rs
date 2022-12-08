@@ -360,15 +360,3 @@ pub mod formats {
         signed: true,
     };
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn fmt() {
-        println!("{}", formats::S16);
-        println!("{}", formats::U8);
-        println!("{}", formats::F32);
-    }
-}
