@@ -1,26 +1,37 @@
-use thiserror::Error;
+use core::fmt;
+
+use alloc::string::String;
 
 /// General coding errors.
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum Error {
     /// Invalid input data.
-    #[error("Invalid Data")]
     InvalidData,
     /// A coding operation needs more data to be completed.
-    #[error("Additional data needed")]
     MoreDataNeeded,
     /// Incomplete input configuration.
-    #[error("Configuration Incomplete")]
     ConfigurationIncomplete,
     /// Invalid input configuration.
-    #[error("Configuration Invalid")]
     ConfigurationInvalid,
     /// Unsupported requested feature.
-    #[error("Unsupported feature {0}")]
     Unsupported(String),
     // TODO add support for dependency-specific errors here
     // Inner(failure::Context)
 }
 
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Error::InvalidData => write!(f, "Invalid Data"),
+            Error::MoreDataNeeded => write!(f, "Additional data needed"),
+            Error::ConfigurationIncomplete => write!(f, "Configuration Incomplete"),
+            Error::ConfigurationInvalid => write!(f, "Configuration Invalid"),
+            Error::Unsupported(uf) => write!(f, "Unsupported feature {uf}"),
+        }
+    }
+}
+
+impl core::error::Error for Error {}
+
 /// A specialized `Result` type for coding operations.
-pub type Result<T> = ::std::result::Result<T, Error>;
+pub type Result<T> = ::core::result::Result<T, Error>;
