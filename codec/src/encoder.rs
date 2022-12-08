@@ -1,5 +1,5 @@
-use std::collections::HashMap;
-use std::convert::Into;
+use core::convert::Into;
+use alloc::vec::Vec;
 
 use av_data::frame::ArcFrame;
 use av_data::packet::Packet;
@@ -132,9 +132,14 @@ pub trait Descriptor {
     fn describe(&self) -> &Descr;
 }
 
+#[cfg(feature = "std")]
+type CodecMap<K, V> = std::collections::HashMap<K, V>;
+#[cfg(not(feature = "std"))]
+type CodecMap<K, V> = alloc::collections::BTreeMap<K, V>;
+
 /// A list of codec descriptors.
 pub struct Codecs<T: 'static + Descriptor + ?Sized> {
-    list: HashMap<&'static str, Vec<&'static T>>,
+    list: CodecMap<&'static str, Vec<&'static T>>,
 }
 
 impl<T: Descriptor + ?Sized> CodecList for Codecs<T> {
@@ -142,7 +147,7 @@ impl<T: Descriptor + ?Sized> CodecList for Codecs<T> {
 
     fn new() -> Self {
         Self {
-            list: HashMap::new(),
+            list: CodecMap::new(),
         }
     }
 
@@ -167,8 +172,10 @@ mod test {
 
     mod dummy {
         use super::super::*;
+        use alloc::string::String;
         use av_data::pixel::Formaton;
-        use std::sync::Arc;
+        use alloc::sync::Arc;
+        use alloc::{vec, format};
 
         pub struct Enc {
             state: usize,
@@ -255,7 +262,7 @@ mod test {
                         width: self.h.unwrap(),
                         format: self.format.clone(),
                     })),
-                    codec_id: Some("dummy".to_owned()),
+                    codec_id: Some(String::from("dummy")),
                     extradata: self.get_extradata(),
                     bit_rate: 0,
                     convergence_window: 0,

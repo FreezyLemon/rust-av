@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use alloc::vec::Vec;
 
 use av_data::frame::ArcFrame;
 use av_data::packet::Packet;
@@ -97,9 +97,14 @@ pub trait Descriptor {
     fn describe(&self) -> &Descr;
 }
 
+#[cfg(feature = "std")]
+type CodecMap<K, V> = std::collections::HashMap<K, V>;
+#[cfg(not(feature = "std"))]
+type CodecMap<K, V> = alloc::collections::BTreeMap<K, V>;
+
 /// A list of codec descriptors.
 pub struct Codecs<T: 'static + Descriptor + ?Sized> {
-    list: HashMap<&'static str, Vec<&'static T>>,
+    list: CodecMap<&'static str, Vec<&'static T>>,
 }
 
 impl<T: Descriptor + ?Sized> CodecList for Codecs<T> {
@@ -107,7 +112,7 @@ impl<T: Descriptor + ?Sized> CodecList for Codecs<T> {
 
     fn new() -> Self {
         Self {
-            list: HashMap::new(),
+            list: CodecMap::new(),
         }
     }
 
