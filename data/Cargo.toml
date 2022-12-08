@@ -13,13 +13,25 @@ edition = "2021"
 std = []
 
 [dependencies]
-byte-slice-cast = "1.2.1"
-bytes = "1.2.1"
-thiserror = "1.0"
-num-rational = "0.4.0"
-num-traits = "0.2.8"
+byte-slice-cast = { version = "1.2.1", default-features = false }
+bytes = { version = "1.2.1", default-features = false }
+num-rational = { version = "0.4.0", default-features = false }
+num-traits = { version = "0.2.8", default-features = false }
 num-derive = "0.3"
 
-[[tests]]
-name = "All tests"
+[[test]]
+name = "pixel"
+path = "src/tests/pixel.rs"
+
+[[test]]
+name = "frame"
+path = "src/tests/frame.rs"
+
+[[test]]
+name = "packet"
+path = "src/tests/packet.rs"
 required-features = ["std"]
+
+[[test]]
+name = "misc"
+path = "src/tests/misc.rs"
