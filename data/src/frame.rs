@@ -39,8 +39,7 @@ impl fmt::Display for FrameError {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for FrameError {}
+impl core::error::Error for FrameError {}
 
 // TODO: Change it to provide Droppable/Seekable information or use a separate enum?
 /// A list of recognized frame types.

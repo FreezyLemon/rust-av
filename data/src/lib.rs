@@ -2,6 +2,7 @@
 
 #![deny(missing_docs, clippy::undocumented_unsafe_blocks)]
 
+#![feature(error_in_core)]
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
 extern crate alloc;
 
