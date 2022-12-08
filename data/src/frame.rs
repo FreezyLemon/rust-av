@@ -2,10 +2,13 @@
 
 #![allow(dead_code, unused_variables)]
 
-use std::convert::From;
-use std::fmt;
-use std::ptr::copy_nonoverlapping;
-use std::sync::Arc;
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
+use core::convert::From;
+use core::fmt;
+use core::ptr::copy_nonoverlapping;
 
 use byte_slice_cast::*;
 use bytes::BytesMut;

@@ -6,9 +6,11 @@
 use num_derive::{FromPrimitive, ToPrimitive};
 pub use num_traits::cast::ToPrimitive;
 pub use num_traits::FromPrimitive;
-use std::fmt;
-use std::ops::Index;
-use std::slice;
+
+use alloc::format;
+use core::fmt;
+use core::ops::Index;
+use core::slice;
 
 /// YUV color range.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

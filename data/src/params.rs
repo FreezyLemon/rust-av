@@ -2,7 +2,9 @@
 
 use crate::audiosample::{ChannelMap, Soniton};
 use crate::pixel::Formaton;
-use std::sync::Arc;
+use alloc::string::String;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
 
 /// Video stream information.
 #[derive(Clone, Debug, PartialEq, Eq)]

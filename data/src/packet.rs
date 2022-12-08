@@ -3,6 +3,7 @@
 #![allow(dead_code)]
 
 use crate::timeinfo::TimeInfo;
+use alloc::{vec, vec::Vec};
 use std::io::{Read, Result, Write};
 
 /// Packet with compressed data.
@@ -57,6 +58,7 @@ impl Packet {
 }
 
 /// Used to read a packet from a source.
+#[cfg(feature = "std")]
 pub trait ReadPacket: Read {
     /// Reads a packet from a source.
     fn get_packet(&mut self, len: usize) -> Result<Packet> {
@@ -67,6 +69,7 @@ pub trait ReadPacket: Read {
 }
 
 /// Used to write a packet into a source.
+#[cfg(feature = "std")]
 pub trait WritePacket: Write {
     /// Writes a packet into a source.
     fn put_packet(&mut self, pkt: Packet) -> Result<()> {
@@ -74,10 +77,13 @@ pub trait WritePacket: Write {
     }
 }
 
+#[cfg(feature = "std")]
 impl<R: Read + ?Sized> ReadPacket for R {}
+
+#[cfg(feature = "std")]
 impl<W: Write + ?Sized> WritePacket for W {}
 
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 /// A specialized type for a thread-safe reference-counting pointer `Packet`.
 pub type ArcPacket = Arc<Packet>;

@@ -1,7 +1,7 @@
 //! Audio sample format definitions.
 
-use std::fmt;
-use std::string::*;
+use alloc::{vec, vec::Vec};
+use core::fmt;
 
 /// Audio format definition.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

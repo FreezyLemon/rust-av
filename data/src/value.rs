@@ -3,8 +3,8 @@
 use crate::audiosample::Soniton;
 use crate::pixel::Formaton;
 
-use std::convert::From;
-use std::sync::Arc;
+use alloc::sync::Arc;
+use core::convert::From;
 
 /// Accepted option values.
 #[derive(Debug)]

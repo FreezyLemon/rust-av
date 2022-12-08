@@ -2,6 +2,9 @@
 
 #![deny(missing_docs, clippy::undocumented_unsafe_blocks)]
 
+#![cfg_attr(not(any(test, feature = "std")), no_std)]
+extern crate alloc;
+
 /// A module to represent and interact with rational numbers.
 pub mod rational {
     pub use num_rational::*;
