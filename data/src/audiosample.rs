@@ -1,6 +1,6 @@
 //! Audio sample format definitions.
 
-use alloc::{vec, vec::Vec, string::ToString};
+use alloc::{string::ToString, vec, vec::Vec};
 use core::fmt;
 
 /// Audio format definition.

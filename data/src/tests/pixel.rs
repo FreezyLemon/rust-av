@@ -1,9 +1,9 @@
 extern crate alloc;
 use alloc::sync::Arc;
 
-use av_data::pixel::*;
-use av_data::pixel::formats::*;
 use av_data::frame::*;
+use av_data::pixel::formats::*;
+use av_data::pixel::*;
 
 #[test]
 fn comparison() {

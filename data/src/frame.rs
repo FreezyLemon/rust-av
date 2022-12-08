@@ -34,7 +34,7 @@ impl fmt::Display for FrameError {
             InvalidIndex => "Invalid Index",
             InvalidConversion => "Invalid Conversion",
         };
-        
+
         write!(f, "{s}")
     }
 }

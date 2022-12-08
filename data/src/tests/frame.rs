@@ -1,8 +1,8 @@
 extern crate alloc;
 use alloc::sync::Arc;
 
-use av_data::audiosample::*;
 use av_data::audiosample::formats::*;
+use av_data::audiosample::*;
 use av_data::frame::*;
 
 #[test]

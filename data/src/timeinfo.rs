@@ -1,8 +1,8 @@
 //! Time info definitions for frames and packets.
 
 use crate::rational::Rational64;
-use core::any::Any;
 use alloc::sync::Arc;
+use core::any::Any;
 
 /// Timestamp information for frames and packets.
 #[derive(Debug, Clone, Default)]
