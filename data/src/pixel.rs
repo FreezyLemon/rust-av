@@ -3,12 +3,49 @@
 //! Re-exports num_traits::FromPrimitive and num_traits::cast::ToPrimitive
 //! in order to make easy to cast a parsed value into correct enum structures.
 
-use num_derive::{FromPrimitive, ToPrimitive};
 pub use num_traits::cast::ToPrimitive;
 pub use num_traits::FromPrimitive;
 use std::fmt;
 use std::ops::Index;
 use std::slice;
+
+macro_rules! with_primitive_conversions {
+    ($(#[$meta:meta])* $vis:vis enum $name:ident {
+        $($(#[$vmeta:meta])* $vname:ident $(= $val:expr)?,)*
+    }) => {
+        $(#[$meta])*
+        $vis enum $name {
+            $($(#[$vmeta])* $vname $(= $val)?,)*
+        }
+
+        impl num_traits::FromPrimitive for $name {
+            #[inline]
+            fn from_i64(n: i64) -> Option<Self> {
+                match n {
+                    $(n if n == $name::$vname as i64 => Some($name::$vname) ,)*
+                    _ => None,
+                }
+            }
+
+            #[inline]
+            fn from_u64(n: u64) -> Option<Self> {
+                Self::from_i64(n as i64)
+            }
+        }
+
+        impl num_traits::ToPrimitive for $name {
+            #[inline]
+            fn to_i64(&self) -> Option<i64> {
+                Some(*self as i64)
+            }
+
+            #[inline]
+            fn to_u64(&self) -> Option<u64> {
+                Some(*self as u64)
+            }
+        }
+    };
+}
 
 /// YUV color range.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -29,70 +66,72 @@ impl fmt::Display for YUVRange {
     }
 }
 
-/// Describes the matrix coefficients used in deriving
-/// luma and chroma signals from the green, blue and red or X, Y and Z primaries.
-///
-/// Values adopted from Table 4 of ISO/IEC 23001-8:2013/DCOR1.
-#[allow(clippy::upper_case_acronyms)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-pub enum MatrixCoefficients {
-    /// The identity matrix.
-    /// Typically used for:
+with_primitive_conversions! {
+    /// Describes the matrix coefficients used in deriving
+    /// luma and chroma signals from the green, blue and red or X, Y and Z primaries.
     ///
-    /// - GBR (often referred to as RGB)
-    /// - YZX (often referred to as XYZ)
-    /// - IEC 61966-2-1 sRGB
-    /// - SMPTE ST 428-1 (2019)
-    Identity = 0,
-    /// - Rec. ITU-R BT.709-6
-    /// - Rec. ITU-R BT.1361-0 conventional colour gamut system and extended colour
-    ///   gamut system (historical)
-    /// - IEC 61966-2-4 xvYCC709
-    /// - SMPTE RP 177 (1993) Annex B
-    BT709 = 1,
-    /// Image characteristics are unknown or are determined by the application.
-    Unspecified = 2,
-    /// For future use by ITU-T | ISO/IEC.
-    Reserved = 3,
-    /// United States Federal Communications Commission (2003) Title 47 Code of
-    /// Federal Regulations 73.682 (a) (20)
-    BT470M = 4,
-    /// - Rec. ITU-R BT.470-6 System B, G (historical)
-    /// - Rec. ITU-R BT.601-7 625
-    /// - Rec. ITU-R BT.1358-0 625 (historical)
-    /// - Rec. ITU-R BT.1700-0 625 PAL and 625 SECAM
-    /// - IEC 61966-2-1 sYCC
-    /// - IEC 61966-2-4 xvYCC601
-    ///
-    /// (functionally the same as the value 6)
-    BT470BG = 5,
-    /// - Rec. ITU-R BT.601-7 525
-    /// - Rec. ITU-R BT.1358-1 525 or 625 (historical)
-    /// - Rec. ITU-R BT.1700-0 NTSC
-    /// - SMPTE ST 170 (2004)
-    ///
-    /// (functionally the same as the value 5)
-    ST170M = 6,
-    /// SMPTE ST 240 (1999)
-    ST240M = 7,
-    /// The YCoCg color model, also known as the YCgCo color model,
-    /// is the color space formed from a simple transformation of
-    /// an associated RGB color space into a luma value and
-    /// two chroma values called chrominance green and chrominance orange.
-    YCgCo = 8,
-    /// - Rec. ITU-R BT.2020-2 (non-constant luminance)
-    /// - Rec. ITU-R BT.2100-2 Y′CbCr
-    BT2020NonConstantLuminance = 9,
-    /// Rec. ITU-R BT.2020-2 (constant luminance)
-    BT2020ConstantLuminance = 10,
-    /// SMPTE ST 2085 (2015)
-    ST2085 = 11,
-    /// Chromaticity-derived non-constant luminance system.
-    ChromaticityDerivedNonConstantLuminance = 12,
-    /// Chromaticity-derived constant luminance system.
-    ChromaticityDerivedConstantLuminance = 13,
-    /// Rec. ITU-R BT.2100-2 ICTCP
-    ICtCp = 14,
+    /// Values adopted from Table 4 of ISO/IEC 23001-8:2013/DCOR1.
+    #[allow(clippy::upper_case_acronyms)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum MatrixCoefficients {
+        /// The identity matrix.
+        /// Typically used for:
+        ///
+        /// - GBR (often referred to as RGB)
+        /// - YZX (often referred to as XYZ)
+        /// - IEC 61966-2-1 sRGB
+        /// - SMPTE ST 428-1 (2019)
+        Identity = 0,
+        /// - Rec. ITU-R BT.709-6
+        /// - Rec. ITU-R BT.1361-0 conventional colour gamut system and extended colour
+        ///   gamut system (historical)
+        /// - IEC 61966-2-4 xvYCC709
+        /// - SMPTE RP 177 (1993) Annex B
+        BT709 = 1,
+        /// Image characteristics are unknown or are determined by the application.
+        Unspecified = 2,
+        /// For future use by ITU-T | ISO/IEC.
+        Reserved = 3,
+        /// United States Federal Communications Commission (2003) Title 47 Code of
+        /// Federal Regulations 73.682 (a) (20)
+        BT470M = 4,
+        /// - Rec. ITU-R BT.470-6 System B, G (historical)
+        /// - Rec. ITU-R BT.601-7 625
+        /// - Rec. ITU-R BT.1358-0 625 (historical)
+        /// - Rec. ITU-R BT.1700-0 625 PAL and 625 SECAM
+        /// - IEC 61966-2-1 sYCC
+        /// - IEC 61966-2-4 xvYCC601
+        ///
+        /// (functionally the same as the value 6)
+        BT470BG = 5,
+        /// - Rec. ITU-R BT.601-7 525
+        /// - Rec. ITU-R BT.1358-1 525 or 625 (historical)
+        /// - Rec. ITU-R BT.1700-0 NTSC
+        /// - SMPTE ST 170 (2004)
+        ///
+        /// (functionally the same as the value 5)
+        ST170M = 6,
+        /// SMPTE ST 240 (1999)
+        ST240M = 7,
+        /// The YCoCg color model, also known as the YCgCo color model,
+        /// is the color space formed from a simple transformation of
+        /// an associated RGB color space into a luma value and
+        /// two chroma values called chrominance green and chrominance orange.
+        YCgCo = 8,
+        /// - Rec. ITU-R BT.2020-2 (non-constant luminance)
+        /// - Rec. ITU-R BT.2100-2 Y′CbCr
+        BT2020NonConstantLuminance = 9,
+        /// Rec. ITU-R BT.2020-2 (constant luminance)
+        BT2020ConstantLuminance = 10,
+        /// SMPTE ST 2085 (2015)
+        ST2085 = 11,
+        /// Chromaticity-derived non-constant luminance system.
+        ChromaticityDerivedNonConstantLuminance = 12,
+        /// Chromaticity-derived constant luminance system.
+        ChromaticityDerivedConstantLuminance = 13,
+        /// Rec. ITU-R BT.2100-2 ICTCP
+        ICtCp = 14,
+    }
 }
 
 impl fmt::Display for MatrixCoefficients {
@@ -125,65 +164,67 @@ impl fmt::Display for MatrixCoefficients {
     }
 }
 
-/// Indicates the chromaticity coordinates of the source colour primaries as specified in Table 2 in terms
-/// of the CIE 1931 definition of x and y as specified by ISO 11664-1.
-///
-/// Values adopted from Table 4 of ISO/IEC 23001-8:2013/DCOR1.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-#[allow(clippy::upper_case_acronyms)]
-pub enum ColorPrimaries {
-    /// For future use by ITU-T | ISO/IEC.
-    Reserved0 = 0,
-    /// - Rec. ITU-R BT.709-6
-    /// - Rec. ITU-R BT.1361-0 conventional colour gamut
-    ///   system and extended colour gamut system (historical)
-    /// - IEC 61966-2-1 sRGB or sYCC
-    /// - IEC 61966-2-4
-    /// - Society of Motion Picture and Television Engineers
-    ///   (SMPTE) RP 177 (1993) Annex B
-    BT709 = 1,
-    /// Image characteristics are unknown or are determined by
-    /// the application.
-    Unspecified = 2,
-    /// For future use by ITU-T | ISO/IEC.
-    Reserved = 3,
-    /// - Rec. ITU-R BT.470-6 System M (historical)
-    /// - United States National Television System Committee
-    ///   1953 Recommendation for transmission standards for
-    ///   color television
-    /// - United States Federal Communications Commission
-    ///   (2003) Title 47 Code of Federal Regulations 73.682 (a) (20)
-    BT470M = 4,
-    /// - Rec. ITU-R BT.470-6 System B, G (historical)
-    /// - Rec. ITU-R BT.601-7 625
-    /// - Rec. ITU-R BT.1358-0 625 (historical)
-    /// - Rec. ITU-R BT.1700-0 625 PAL and 625 SECAM
-    BT470BG = 5,
-    /// - Rec. ITU-R BT.601-7 525
-    /// - Rec. ITU-R BT.1358-1 525 or 625 (historical)
-    /// - Rec. ITU-R BT.1700-0 NTSC
-    /// - SMPTE ST 170 (2004)
+with_primitive_conversions! {
+    /// Indicates the chromaticity coordinates of the source colour primaries as specified in Table 2 in terms
+    /// of the CIE 1931 definition of x and y as specified by ISO 11664-1.
     ///
-    /// (functionally the same as the value 7)
-    ST170M = 6,
-    /// - SMPTE ST 240 (1999)
-    ///
-    /// (functionally the same as the value 6)
-    ST240M = 7,
-    /// Generic film (colour filters using Illuminant C)
-    Film = 8,
-    /// - Rec. ITU-R BT.2020-2
-    /// - Rec. ITU-R BT.2100-2
-    BT2020 = 9,
-    /// - SMPTE ST 428-1 (2019)
-    /// - (CIE 1931 XYZ as in ISO 11664-1)
-    ST428 = 10,
-    /// SMPTE RP 431-2 (2011)
-    P3DCI = 11,
-    /// SMPTE EG 432-1 (2010)
-    P3Display = 12,
-    /// No corresponding industry specification identified.
-    Tech3213 = 22,
+    /// Values adopted from Table 4 of ISO/IEC 23001-8:2013/DCOR1.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[allow(clippy::upper_case_acronyms)]
+    pub enum ColorPrimaries {
+        /// For future use by ITU-T | ISO/IEC.
+        Reserved0 = 0,
+        /// - Rec. ITU-R BT.709-6
+        /// - Rec. ITU-R BT.1361-0 conventional colour gamut
+        ///   system and extended colour gamut system (historical)
+        /// - IEC 61966-2-1 sRGB or sYCC
+        /// - IEC 61966-2-4
+        /// - Society of Motion Picture and Television Engineers
+        ///   (SMPTE) RP 177 (1993) Annex B
+        BT709 = 1,
+        /// Image characteristics are unknown or are determined by
+        /// the application.
+        Unspecified = 2,
+        /// For future use by ITU-T | ISO/IEC.
+        Reserved = 3,
+        /// - Rec. ITU-R BT.470-6 System M (historical)
+        /// - United States National Television System Committee
+        ///   1953 Recommendation for transmission standards for
+        ///   color television
+        /// - United States Federal Communications Commission
+        ///   (2003) Title 47 Code of Federal Regulations 73.682 (a) (20)
+        BT470M = 4,
+        /// - Rec. ITU-R BT.470-6 System B, G (historical)
+        /// - Rec. ITU-R BT.601-7 625
+        /// - Rec. ITU-R BT.1358-0 625 (historical)
+        /// - Rec. ITU-R BT.1700-0 625 PAL and 625 SECAM
+        BT470BG = 5,
+        /// - Rec. ITU-R BT.601-7 525
+        /// - Rec. ITU-R BT.1358-1 525 or 625 (historical)
+        /// - Rec. ITU-R BT.1700-0 NTSC
+        /// - SMPTE ST 170 (2004)
+        ///
+        /// (functionally the same as the value 7)
+        ST170M = 6,
+        /// - SMPTE ST 240 (1999)
+        ///
+        /// (functionally the same as the value 6)
+        ST240M = 7,
+        /// Generic film (colour filters using Illuminant C)
+        Film = 8,
+        /// - Rec. ITU-R BT.2020-2
+        /// - Rec. ITU-R BT.2100-2
+        BT2020 = 9,
+        /// - SMPTE ST 428-1 (2019)
+        /// - (CIE 1931 XYZ as in ISO 11664-1)
+        ST428 = 10,
+        /// SMPTE RP 431-2 (2011)
+        P3DCI = 11,
+        /// SMPTE EG 432-1 (2010)
+        P3Display = 12,
+        /// No corresponding industry specification identified.
+        Tech3213 = 22,
+    }
 }
 
 impl fmt::Display for ColorPrimaries {
@@ -207,94 +248,96 @@ impl fmt::Display for ColorPrimaries {
     }
 }
 
-/// Either indicates the reference opto-electronic transfer characteristic
-/// function of the source picture as a function of a source input linear optical intensity
-/// input Lc with a nominal real-valued range of 0 to 1 or indicates the inverse of the
-/// reference electro-optical transfer characteristic function as a function of an
-/// output linear optical intensity Lo with a nominal real-valued range of 0 to 1.
-///
-/// Values adopted from Table 4 of ISO/IEC 23001-8:2013/DCOR1.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive, ToPrimitive)]
-#[allow(clippy::upper_case_acronyms)]
-pub enum TransferCharacteristic {
-    /// For future use by ITU-T | ISO/IEC.
-    Reserved0 = 0,
-    /// - Rec. ITU-R BT.709-6
-    /// - Rec. ITU-R BT.1361-0 conventional
-    ///   colour gamut system (historical)
+with_primitive_conversions! {
+    /// Either indicates the reference opto-electronic transfer characteristic
+    /// function of the source picture as a function of a source input linear optical intensity
+    /// input Lc with a nominal real-valued range of 0 to 1 or indicates the inverse of the
+    /// reference electro-optical transfer characteristic function as a function of an
+    /// output linear optical intensity Lo with a nominal real-valued range of 0 to 1.
     ///
-    /// (functionally the same as the values 6, 14 and 15)
-    BT1886 = 1,
-    /// Image characteristics are unknown or
-    /// are determined by the application.
-    Unspecified = 2,
-    /// For future use by ITU-T | ISO/IEC.
-    Reserved = 3,
-    /// Assumed display gamma 2.2.
-    ///
-    /// - Rec. ITU-R BT.470-6 System M
-    ///   (historical)
-    /// - United States National Television
-    ///   System Committee 1953
-    ///   Recommendation for transmission
-    ///   standards for color television
-    /// - United States Federal Communications
-    ///   Commission (2003) Title 47 Code of
-    ///   Federal Regulations 73.682 (a) (20)
-    /// - Rec. ITU-R BT.1700-0 625 PAL and
-    ///   625 SECAM
-    BT470M = 4,
-    /// Assumed display gamma 2.8.
-    ///
-    /// Rec. ITU-R BT.470-6 System B, G (historical)
-    BT470BG = 5,
-    /// - Rec. ITU-R BT.601-7 525 or 625
-    /// - Rec. ITU-R BT.1358-1 525 or 625
-    ///   (historical)
-    /// - Rec. ITU-R BT.1700-0 NTSC
-    /// - SMPTE ST 170 (2004)
-    ///
-    /// (functionally the same as the values 1, 14 and 15)
-    ST170M = 6,
-    /// SMPTE ST 240 (1999)
-    ST240M = 7,
-    /// Linear transfer characteristics
-    Linear = 8,
-    /// Logarithmic transfer characteristic
-    /// (100:1 range)
-    Logarithmic100 = 9,
-    /// Logarithmic transfer characteristic
-    /// (100 * Sqrt( 10 ) : 1 range)
-    Logarithmic316 = 10,
-    /// IEC 61966-2-4
-    XVYCC = 11,
-    /// Rec. ITU-R BT.1361-0 extended
-    /// colour gamut system (historical)
-    BT1361E = 12,
-    /// - IEC 61966-2-1 sRGB (with
-    ///   MatrixCoefficients equal to 0)
-    /// - IEC 61966-2-1 sYCC (with
-    ///   MatrixCoefficients equal to 5)
-    SRGB = 13,
-    /// Rec. ITU-R BT.2020-2 (10-bit system)
-    ///
-    /// (functionally the same as the values 1, 6 and 15)
-    BT2020Ten = 14,
-    /// Rec. ITU-R BT.2020-2 (12-bit system)
-    ///
-    /// (functionally the same as the values 1, 6 and 14)
-    BT2020Twelve = 15,
-    /// - SMPTE ST 2084 (2014) for 10-, 12-,
-    ///   14- and 16-bit systems
-    /// - Rec. ITU-R BT.2100-2 perceptual
-    ///   quantization (PQ) system
-    PerceptualQuantizer = 16,
-    /// SMPTE ST 428-1 (2019)
-    ST428 = 17,
-    /// - ARIB STD-B67 (2015)
-    /// - Rec. ITU-R BT.2100-2 hybrid log-
-    ///   gamma (HLG) system
-    HybridLogGamma = 18,
+    /// Values adopted from Table 4 of ISO/IEC 23001-8:2013/DCOR1.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    #[allow(clippy::upper_case_acronyms)]
+    pub enum TransferCharacteristic {
+        /// For future use by ITU-T | ISO/IEC.
+        Reserved0 = 0,
+        /// - Rec. ITU-R BT.709-6
+        /// - Rec. ITU-R BT.1361-0 conventional
+        ///   colour gamut system (historical)
+        ///
+        /// (functionally the same as the values 6, 14 and 15)
+        BT1886 = 1,
+        /// Image characteristics are unknown or
+        /// are determined by the application.
+        Unspecified = 2,
+        /// For future use by ITU-T | ISO/IEC.
+        Reserved = 3,
+        /// Assumed display gamma 2.2.
+        ///
+        /// - Rec. ITU-R BT.470-6 System M
+        ///   (historical)
+        /// - United States National Television
+        ///   System Committee 1953
+        ///   Recommendation for transmission
+        ///   standards for color television
+        /// - United States Federal Communications
+        ///   Commission (2003) Title 47 Code of
+        ///   Federal Regulations 73.682 (a) (20)
+        /// - Rec. ITU-R BT.1700-0 625 PAL and
+        ///   625 SECAM
+        BT470M = 4,
+        /// Assumed display gamma 2.8.
+        ///
+        /// Rec. ITU-R BT.470-6 System B, G (historical)
+        BT470BG = 5,
+        /// - Rec. ITU-R BT.601-7 525 or 625
+        /// - Rec. ITU-R BT.1358-1 525 or 625
+        ///   (historical)
+        /// - Rec. ITU-R BT.1700-0 NTSC
+        /// - SMPTE ST 170 (2004)
+        ///
+        /// (functionally the same as the values 1, 14 and 15)
+        ST170M = 6,
+        /// SMPTE ST 240 (1999)
+        ST240M = 7,
+        /// Linear transfer characteristics
+        Linear = 8,
+        /// Logarithmic transfer characteristic
+        /// (100:1 range)
+        Logarithmic100 = 9,
+        /// Logarithmic transfer characteristic
+        /// (100 * Sqrt( 10 ) : 1 range)
+        Logarithmic316 = 10,
+        /// IEC 61966-2-4
+        XVYCC = 11,
+        /// Rec. ITU-R BT.1361-0 extended
+        /// colour gamut system (historical)
+        BT1361E = 12,
+        /// - IEC 61966-2-1 sRGB (with
+        ///   MatrixCoefficients equal to 0)
+        /// - IEC 61966-2-1 sYCC (with
+        ///   MatrixCoefficients equal to 5)
+        SRGB = 13,
+        /// Rec. ITU-R BT.2020-2 (10-bit system)
+        ///
+        /// (functionally the same as the values 1, 6 and 15)
+        BT2020Ten = 14,
+        /// Rec. ITU-R BT.2020-2 (12-bit system)
+        ///
+        /// (functionally the same as the values 1, 6 and 14)
+        BT2020Twelve = 15,
+        /// - SMPTE ST 2084 (2014) for 10-, 12-,
+        ///   14- and 16-bit systems
+        /// - Rec. ITU-R BT.2100-2 perceptual
+        ///   quantization (PQ) system
+        PerceptualQuantizer = 16,
+        /// SMPTE ST 428-1 (2019)
+        ST428 = 17,
+        /// - ARIB STD-B67 (2015)
+        /// - Rec. ITU-R BT.2100-2 hybrid log-
+        ///   gamma (HLG) system
+        HybridLogGamma = 18,
+    }
 }
 
 impl fmt::Display for TransferCharacteristic {
