@@ -96,6 +96,9 @@ impl<R: Read + Seek + Send + Sync> Buffered for AccReader<R> {
 }
 
 impl<R: Read + Seek> Read for AccReader<R> {
+    // clippy bug, remove when MSRV is >= 1.78
+    // see: https://github.com/rust-lang/rust-clippy/issues/12208
+    #[allow(clippy::unused_io_amount)]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         log::trace!(
             "read pos: {} cap: {} buflen: {}",
