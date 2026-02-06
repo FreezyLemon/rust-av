@@ -1,7 +1,6 @@
-use av_bitstream::bitread::BitReadLE;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-
 use av_bitstream::bitread::*;
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
 
 pub fn bitreader(c: &mut Criterion) {
     let buffer: Vec<u8> = (0..2048).flat_map(|_| 0..128).collect();
